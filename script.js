@@ -1,108 +1,4 @@
-const themes = [
-  "Animal mignon",
-  "Animal effrayant",
-  "Animal lent",
-  "Animal rapide",
-  "Animal bruyant",
-  "Métier difficile",
-  "Métier dangereux",
-  "Métier rigolo",
-  "Métier fatigant",
-  "Métier que je voudrais faire",
-  "Nourriture préférée",
-  "Nourriture détestée",
-  "Nourriture sucrée",
-  "Nourriture salée",
-  "Nourriture étrange",
-  "Sport d'équipe",
-  "Sport individuel",
-  "Sport facile",
-  "Sport difficile",
-  "Sport dangereux",
-  "Objet utile",
-  "Objet inutile",
-  "Objet dangereux",
-  "Objet lourd",
-  "Objet léger",
-  "Film triste",
-  "Film drôle",
-  "Film d'action",
-  "Film ennuyeux",
-  "Film à revoir",
-  "Musique calme",
-  "Musique forte",
-  "Musique qui me fait danser",
-  "Musique pour dormir",
-  "Musique joyeuse",
-  "Endroit bruyant",
-  "Endroit calme",
-  "Endroit dangereux",
-  "Endroit de rêve",
-  "Endroit chaud",
-  "Personne célèbre",
-  "Personne drôle",
-  "Personne effrayante",
-  "Personne que j’admire",
-  "Personne en colère",
-  "Moment de la journée",
-  "Jour de la semaine",
-  "Mois de l’année",
-  "Saison préférée",
-  "Saison froide",
-  "Couleur chaude",
-  "Couleur froide",
-  "Couleur vive",
-  "Couleur pastel",
-  "Couleur foncée",
-  "Vêtement confortable",
-  "Vêtement chic",
-  "Vêtement chaud",
-  "Vêtement froid",
-  "Accessoire de mode",
-  "Chose qu’on trouve à l’école",
-  "Chose qu’on trouve à la maison",
-  "Chose qu’on trouve dans la rue",
-  "Chose qu’on trouve à la plage",
-  "Chose qu’on trouve dans la cuisine",
-  "Odeur agréable",
-  "Odeur désagréable",
-  "Goût sucré",
-  "Goût amer",
-  "Goût acide",
-  "Invention utile",
-  "Invention inutile",
-  "Invention du futur",
-  "Invention du passé",
-  "Invention bizarre",
-  "Émotion positive",
-  "Émotion négative",
-  "Émotion forte",
-  "Émotion silencieuse",
-  "Émotion difficile à expliquer",
-  "Personnage de film",
-  "Personnage de dessin animé",
-  "Super-héros",
-  "Méchant célèbre",
-  "Personnage historique",
-  "Animal domestique",
-  "Animal sauvage",
-  "Animal imaginaire",
-  "Animal aquatique",
-  "Animal volant",
-  "Jeu vidéo connu",
-  "Jeu de société",
-  "Jeu d’enfance",
-  "Jeu sportif",
-  "Jeu bruyant",
-  "Chanson connue",
-  "Instrument de musique",
-  "Langue étrangère",
-  "Mot compliqué",
-  "Mot drôle"
-];
-
-
-
+const openAIKey = "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"; // À remplacer par votre clé API
 
 let chiffres = [];
 let nombreJoueurs = 0;
@@ -111,9 +7,53 @@ function getNombreAleatoire() {
   return Math.floor(Math.random() * 100) + 1;
 }
 
-function nouveauTheme() {
-  const theme = themes[Math.floor(Math.random() * themes.length)];
-  document.getElementById("theme").textContent = theme;
+async function generateThemeWithAI() {
+  try {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${openAIKey}`
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [{
+          role: "user",
+          content: "Génère un thème original et simple pour un jeu où les joueurs doivent trouver des mots correspondants. Le thème doit être en français, très simple et compréhensible par tous. Réponds uniquement avec le thème, sans commentaires ni ponctuation finale. Exemples: 'Animal mignon', 'Métier dangereux', 'Nourriture sucrée'"
+        }],
+        temperature: 0.9,
+        max_tokens: 20
+      })
+    });
+
+    const data = await response.json();
+    let theme = data.choices[0].message.content.trim();
+    // Nettoyage du résultat
+    theme = theme.replace(/^["']|["']$/g, '').replace(/\.$/, '');
+    return theme || "Thème aléatoire";
+  } catch (error) {
+    console.error("Erreur avec l'API OpenAI:", error);
+    // Thèmes de secours
+    const backupThemes = [
+      "Animal mignon",
+      "Métier rigolo",
+      "Nourriture étrange",
+      "Film à revoir",
+      "Endroit de rêve",
+      "Objet utile",
+      "Couleur vive",
+      "Chose qu'on trouve à l'école"
+    ];
+    return backupThemes[Math.floor(Math.random() * backupThemes.length)];
+  }
+}
+
+async function nouveauTheme() {
+  const themeElement = document.getElementById("theme");
+  themeElement.textContent = "Chargement...";
+  
+  const theme = await generateThemeWithAI();
+  themeElement.textContent = theme;
 }
 
 function initialiserPartie() {
@@ -164,3 +104,6 @@ function initialiserPartie() {
 
   nouveauTheme();
 }
+
+// Générer un premier thème au chargement
+document.addEventListener('DOMContentLoaded', nouveauTheme);
