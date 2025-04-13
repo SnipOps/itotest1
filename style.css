@@ -1,0 +1,26 @@
+body {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  background-color: #f4f4f4;
+  text-align: center;
+}
+
+#players-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.player {
+  background: white;
+  border: 2px solid #333;
+  border-radius: 10px;
+  padding: 10px;
+  margin: 10px;
+  width: 150px;
+}
+
+.player button {
+  margin-top: 10px;
+}
